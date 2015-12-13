@@ -36,8 +36,29 @@ class Init_rrd extends CI_Controller {
 							"RRA:AVERAGE:0.5:1:1008", # 10 min(x) / 6*24*7 = 7 days
 							"RRA:AVERAGE:0.5:6:720",  # 1 hour / 24*30 = 30 days
 							"RRA:AVERAGE:0.5:72:360", # 12 hour / 2*30*6 = 6 months
-							"RRA:AVERAGE:0.5:168:797", # 
-							"RRA:AVERAGE:0.5:288:797", # 
+							"RRA:AVERAGE:0.5:216:120", # 3 days / 10*12 = 1 year
+							"RRA:AVERAGE:0.5:1008:104", # 1 week / 2*52 = 2 year
+					);
+	public $rra_min = array( # save a value every x, total history y
+							"RRA:MIN:0.5:1:1008", # 10 min(x) / 6*24*7 = 7 days
+							"RRA:MIN:0.5:6:720",  # 1 hour / 24*30 = 30 days
+							"RRA:MIN:0.5:72:360", # 12 hour / 2*30*6 = 6 months
+							"RRA:MIN:0.5:216:120", # 3 days / 10*12 = 1 year
+							"RRA:MIN:0.5:1008:104", # 1 week / 2*52 = 2 year
+					);
+	public $rra_max = array( # save a value every x, total history y
+							"RRA:MAX:0.5:1:1008", # 10 min(x) / 6*24*7 = 7 days
+							"RRA:MAX:0.5:6:720",  # 1 hour / 24*30 = 30 days
+							"RRA:MAX:0.5:72:360", # 12 hour / 2*30*6 = 6 months
+							"RRA:MAX:0.5:216:120", # 3 days / 10*12 = 1 year
+							"RRA:MAX:0.5:1008:104", # 1 week / 2*52 = 2 year
+					);
+	public $rra_last = array( # save a value every x, total history y
+							"RRA:LAST:0.5:1:1008", # 10 min(x) / 6*24*7 = 7 days
+							"RRA:LAST:0.5:6:720",  # 1 hour / 24*30 = 30 days
+							"RRA:LAST:0.5:72:360", # 12 hour / 2*30*6 = 6 months
+							"RRA:LAST:0.5:216:120", # 3 days / 10*12 = 1 year
+							"RRA:LAST:0.5:1008:104", # 1 week / 2*52 = 2 year
 					);
 
 	public function index()
@@ -47,6 +68,7 @@ class Init_rrd extends CI_Controller {
 		
 		# create traffic
 		#$this->rrd->create($this->traffic);
+		$this->rrd->create($this->cpu);
 	}
 	
 	# no need for 1 min load when we only poll
@@ -54,32 +76,20 @@ class Init_rrd extends CI_Controller {
 	private function cpu()
 	{
 		# load is roughly core count = heavy load, more then core count = problems
-		return array(	
-						# defaults are oke
-						$this->setup,
-		
-						array(
-							# datasources
-							"DS:cpu_load_five:GAUGE:" . $this->heartbeat . ":0:U",
-							"DS:cpu_load_fifeteen:GAUGE:" . $this->heartbeat . ":0:U",
-						),
-						# 
-						
-						"RRA:MIN:0.5:1:600",
-						"RRA:MIN:0.5:6:700", 
-						"RRA:MIN:0.5:24:775",
-						"RRA:MIN:0.5:288:797",
-						
-						"RRA:MAX:0.5:1:600",
-						"RRA:MAX:0.5:6:700",
-						"RRA:MAX:0.5:24:775",
-						"RRA:MAX:0.5:288:797", 
-						
-						"RRA:LAST:0.5:1:600",
-						"RRA:LAST:0.5:6:700",
-						"RRA:LAST:0.5:24:775",
-						"RRA:LAST:0.5:288:797"
-					)
+		return array_merge(
+					# defaults are oke
+					$this->setup,
+	
+					array(
+						# datasources
+						"DS:cpu_load_five:GAUGE:" . $this->heartbeat . ":0:U",
+						"DS:cpu_load_fifeteen:GAUGE:" . $this->heartbeat . ":0:U",
+					),
+					
+					# rra's max/min/avg
+					$this->rra_max,
+					$this->rra_min,
+					$this->rra_avg
 				);	
 	}
 	
